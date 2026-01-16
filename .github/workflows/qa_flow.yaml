@@ -1,0 +1,64 @@
+name: CD Desarrollo Flow
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+#on:
+#  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+  actions: read
+
+jobs:
+  compile_and_test:
+    uses: servitekconsulting/reusable-workflows/.github/workflows/test_java.yaml@main
+    with:
+      environment: "qa"
+      java_version: "17"
+      java_distribution: "temurin"
+      maven_build: true
+      test_command: "mvn clean test"
+      coverage_path: "target/site/jacoco"
+    secrets: inherit
+
+  build_deploy:
+    permissions:
+      contents: read
+      packages: write   # requerido para hacer push a GHCR
+      id-token: write   # requerido para cosign con OIDC
+
+    uses: servitekconsulting/reusable-workflows/.github/workflows/build_deploy.yaml@main
+    needs: [compile_and_test]
+    secrets: inherit
+    with:
+      working-directory: .
+      image-name: myapp-java
+      environment: qa
+
+  owasp_scan:
+    permissions:
+      contents: read
+      issues: write
+    uses: servitekconsulting/reusable-workflows/.github/workflows/owasp_scan.yaml@main
+    needs: [build_deploy]
+    with:
+      environment: qa
+      owasp_target: 'http://4.152.197.247/'
+    secrets: inherit
+
+  chatgpt-failure-advisor:
+    needs: [compile_and_test, build_deploy, owasp_scan]
+    if: failure()     # ← condición para que solo corra si falló algún job previo
+    uses: servitekconsulting/reusable-workflows/.github/workflows/chatgpt_failure.yaml@main
+    permissions:
+      contents: read
+      actions: read    # ← si tu script usa la API de Actions/logs
+    with:
+      python_version: '3.10'
+      environment: qa
+      #script_path: Developer1-ServitekConsulting/reusable-workflows/.github/scripts/chatgpt_failure_advisor.py
+    secrets: inherit

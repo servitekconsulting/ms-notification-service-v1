@@ -1,0 +1,47 @@
+name: CI Pull Request
+
+on:
+  pull_request:
+    branches: [ master ]
+    types: [ opened, synchronize, reopened, ready_for_review ]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write     # permite crear Issues con los hallazgos del ZAP
+jobs:
+  pr_checks:
+    uses: servitekconsulting/reusable-workflows/.github/workflows/pull_request.yaml@main
+    with:
+      java_version: "17"
+      maven_goals: "clean test package"
+
+      # --- SonarCloud ---
+      sonar_enabled: true
+      sonar_project_key: "developer1-servitekconsulting_api-tesis-prueba"
+      sonar_organization: "developer1-servitekconsulting"
+      sonar_host_url: "https://sonarcloud.io"
+      # sonar_wait_timeout: "600"
+      # sonar_additional_args: "-Dsonar.java.coveragePlugin=jacoco -Dsonar.coverage.jacoco.xmlReportPaths=**/target/site/jacoco/jacoco.xml"
+
+      # --- Snyk (SCA) ---
+      snyk_enabled: true
+      snyk_continue_on_error: true     # cambia a false para romper el pipeline si detecta issues
+      snyk_args: "--file=pom.xml"      # ejemplo; puedes añadir --severity-threshold=high
+
+
+      # --- OWASP ZAP (DAST) ---
+      owasp_enabled: true
+      owasp_target: "http://4.152.197.247/"
+      owasp_cmd_options: "-a"
+      owasp_environment: "qa"
+
+      # --- IA opcional ---
+      review_enabled: true
+      review_label: "chatgpt-review"
+      review_patterns: "*.java,pom.xml"
+      #review_script_path: ".github/scripts/review_inline.py"
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

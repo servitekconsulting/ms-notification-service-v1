@@ -1,0 +1,148 @@
+name: CD Calidad/Producción Flow
+
+on:
+  workflow_dispatch:
+    inputs:
+      releaseCandidateVersion:
+        description: 'Name of version (ie v5.5.0-rc.0)'
+        required: true
+run-name: Release Flow at version ${{ github.event.inputs.releaseCandidateVersion }}
+
+permissions:
+  contents: write
+  packages: write
+  actions: read
+
+jobs:
+  validate_release:
+    uses: servitekconsulting/reusable-workflows/.github/workflows/validate_release.yaml@main
+    with:
+      environment: stg
+      version: ${{ inputs.releaseCandidateVersion }}
+    secrets: inherit
+
+  unit_test:
+    uses: servitekconsulting/reusable-workflows/.github/workflows/test_java.yaml@main
+    needs: [validate_release]
+    with:
+      environment: "stg"
+      java_version: "17"
+      java_distribution: "temurin"
+      maven_build: true
+      test_command: "mvn clean test"
+      coverage_path: "target/site/jacoco"
+    secrets: inherit
+
+  build_deploy_stg:
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    uses: servitekconsulting/reusable-workflows/.github/workflows/build_deploy.yaml@main
+    needs: [unit_test]
+    secrets: inherit
+    with:
+      working-directory: .
+      image-name: myapp-java
+      environment: stg
+      releaseCandidateVersion: ${{ github.event.inputs.releaseCandidateVersion }}
+
+  chatgpt_failure_advisor_stg:
+    needs: [unit_test, build_deploy_stg]
+    if: failure()     # ← condición para que solo corra si falló algún job previo
+    uses: servitekconsulting/reusable-workflows/.github/workflows/chatgpt_failure.yaml@main
+    permissions:
+      contents: read
+      actions: read    # ← si tu script usa la API de Actions/logs
+    with:
+      python_version: '3.10'
+      environment: stg
+    secrets: inherit
+
+  create_rc_release:
+    needs: [build_deploy_stg]   # por si quieres encadenarlo
+    uses: servitekconsulting/reusable-workflows/.github/workflows/create_release.yaml@main
+    with:
+      version: ${{ github.event.inputs.releaseCandidateVersion }}
+      title: "Release Candidate ${{ github.event.inputs.releaseCandidateVersion }}"
+      generate_notes: true
+      draft: false
+    secrets: inherit
+
+  promote_to_prod:
+    needs: [create_rc_release]  # espera a que stg esté OK
+    uses: servitekconsulting/reusable-workflows/.github/workflows/promote_release.yaml@main
+    permissions:
+      contents: write
+      packages: write
+    with:
+      rc_version: ${{ github.event.inputs.releaseCandidateVersion }}
+      image-name: myapp-java
+      publish_latest: true
+      do_ghcr: true
+      do_acr: true
+        
+      # Seguridad:
+      prod_branch: ""
+      prod_branch_pattern: "release/*"  # permitimos ramas release/*
+      allow_tags: true               # opcional, permitir si corres desde un TAG
+      protected_env_name: prod
+      require_org_member: false
+
+    secrets: inherit
+
+  deploy_prod:
+    needs: [promote_to_prod]
+    uses: servitekconsulting/reusable-workflows/.github/workflows/build_deploy.yaml@main
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    with:
+      working-directory: .
+      image-name: myapp-java
+      environment: prd
+      releaseCandidateVersion: ${{ needs.promote_to_prod.outputs.ga_version }}  # usa el 
+      #deployment_name: "myapp-java"       # <- nombre exacto del Deployment en k8s
+      #namespace: "default"
+    secrets: inherit
+  
+  
+  rollback_if_failed:
+    needs: [deploy_prod]
+    if: failure()
+    uses: servitekconsulting/reusable-workflows/.github/workflows/rollback.yaml@main
+    with:
+      rollback_mode: "revision"
+      to_revision: "0"
+      namespace: "default"
+      deployment_name: "myapp-java"
+      environment: ""         # sin aprobación para rollback automático
+    secrets: inherit
+
+  chatgpt_failure_advisor_prod:
+    needs: [deploy_prod, rollback_if_failed]
+    if: failure()     # ← condición para que solo corra si falló algún job previo
+    uses: servitekconsulting/reusable-workflows/.github/workflows/chatgpt_failure.yaml@main
+    permissions:
+      contents: read
+      actions: read    # ← si tu script usa la API de Actions/logs
+    with:
+      python_version: '3.10'
+      environment: prd
+    secrets: inherit
+
+  generate_release:
+    needs: [deploy_prod]
+    uses: servitekconsulting/reusable-workflows/.github/workflows/generate_release.yaml@main
+    permissions:
+      contents: write   # el job interno pide write; aquí puedes dejar read y el reusable eleva a write
+      packages: write
+      id-token: write
+    with:
+      rc_version: ${{ github.event.inputs.releaseCandidateVersion }}
+      title_prefix: "Release"
+      generate_notes: true
+      mark_latest: true
+    secrets: inherit

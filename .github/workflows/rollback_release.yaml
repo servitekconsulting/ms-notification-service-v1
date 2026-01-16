@@ -1,0 +1,45 @@
+name: CD Rollback Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      rollback_mode:
+        description: "Modo de rollback: 'ga_tag' o 'revision'"
+        required: true
+        default: "ga_tag"
+      ga_version:
+        description: "Tag GA (ej: v1.2.3). Obligatorio si modo=ga_tag"
+        required: false
+      to_revision:
+        description: "Revisión K8s (ej: 3). 0 o vacío = revisión previa. Obligatorio si modo=revision"
+        required: false
+        default: "0"
+      namespace:
+        description: "Namespace de Kubernetes"
+        required: false
+        default: "default"
+      deployment_name:
+        description: "Nombre del Deployment"
+        required: true
+        default: "myapp-java"
+      environment:
+        description: "Environment (vacío para omitir aprobación; 'prod' para exigirla)"
+        required: false
+        default: "prod"
+
+permissions:
+  contents: write
+  packages: write
+  actions: read
+
+jobs:
+  rollback:
+    uses: servitekconsulting/reusable-workflows/.github/workflows/rollback.yaml@main
+    with:
+      rollback_mode: ${{ github.event.inputs.rollback_mode }}
+      ga_version:    ${{ github.event.inputs.ga_version }}
+      to_revision:   ${{ github.event.inputs.to_revision }}
+      namespace:     ${{ github.event.inputs.namespace }}
+      deployment_name: ${{ github.event.inputs.deployment_name }}
+      environment:   ${{ github.event.inputs.environment }}
+    secrets: inherit
