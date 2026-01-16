@@ -1,0 +1,17 @@
+
+spring:
+  mail:
+    host: smtp.mailersend.net
+    port: 587
+    username: MS_ROESWe@test-eqvygm09vv5l0p7w.mlsender.net
+    password: mssp.gOGxn89.3z0vklokjdp47qrx.Soucdzs
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+app:
+  mail:
+    from: notificaciones@test-eqvygm09vv5l0p7w.mlsender.net
