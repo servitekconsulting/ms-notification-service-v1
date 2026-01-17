@@ -21,8 +21,6 @@ jobs:
       sonar_project_key: "developer1-servitekconsulting_api-tesis-prueba"
       sonar_organization: "developer1-servitekconsulting"
       sonar_host_url: "https://sonarcloud.io"
-      # sonar_wait_timeout: "600"
-      # sonar_additional_args: "-Dsonar.java.coveragePlugin=jacoco -Dsonar.coverage.jacoco.xmlReportPaths=**/target/site/jacoco/jacoco.xml"
 
       # --- Snyk (SCA) ---
       snyk_enabled: true

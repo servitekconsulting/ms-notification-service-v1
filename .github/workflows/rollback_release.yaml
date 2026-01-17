@@ -21,7 +21,7 @@ on:
       deployment_name:
         description: "Nombre del Deployment"
         required: true
-        default: "myapp-java"
+        default: "ms-notification-service-v1"
       environment:
         description: "Environment (vacío para omitir aprobación; 'prod' para exigirla)"
         required: false

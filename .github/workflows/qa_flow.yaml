@@ -36,7 +36,7 @@ jobs:
     secrets: inherit
     with:
       working-directory: .
-      image-name: myapp-java
+      image-name: ms-notification-service-v1
       environment: qa
 
   owasp_scan:
@@ -60,5 +60,4 @@ jobs:
     with:
       python_version: '3.10'
       environment: qa
-      #script_path: Developer1-ServitekConsulting/reusable-workflows/.github/scripts/chatgpt_failure_advisor.py
     secrets: inherit

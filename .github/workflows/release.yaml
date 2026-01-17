@@ -44,7 +44,7 @@ jobs:
     secrets: inherit
     with:
       working-directory: .
-      image-name: myapp-java
+      image-name: ms-notification-service-v1
       environment: stg
       releaseCandidateVersion: ${{ github.event.inputs.releaseCandidateVersion }}
 
@@ -78,7 +78,7 @@ jobs:
       packages: write
     with:
       rc_version: ${{ github.event.inputs.releaseCandidateVersion }}
-      image-name: myapp-java
+      image-name: ms-notification-service-v1
       publish_latest: true
       do_ghcr: true
       do_acr: true
@@ -101,7 +101,7 @@ jobs:
       id-token: write
     with:
       working-directory: .
-      image-name: myapp-java
+      image-name: ms-notification-service-v1
       environment: prd
       releaseCandidateVersion: ${{ needs.promote_to_prod.outputs.ga_version }}  # usa el 
       #deployment_name: "myapp-java"       # <- nombre exacto del Deployment en k8s
@@ -117,7 +117,7 @@ jobs:
       rollback_mode: "revision"
       to_revision: "0"
       namespace: "default"
-      deployment_name: "myapp-java"
+      deployment_name: "ms-notification-service-v1"
       environment: ""         # sin aprobación para rollback automático
     secrets: inherit
 
