@@ -18,3 +18,46 @@ spec:
           image: servitekcloud.azurecr.io/ms-notification-service-v1:latest  # será sustituida por el tag SHA
           ports:
             - containerPort: 8080
+          env:
+            # Ajusta la JVM para respetar los límites del contenedor
+            - name: JAVA_TOOL_OPTIONS
+              value: >-
+                -XX:+UseContainerSupport
+                -XX:MaxRAMPercentage=75.0
+                -XX:InitialRAMPercentage=25.0
+                -XX:+ExitOnOutOfMemoryError
+          resources:
+            requests:
+              cpu: "250m"      # 0.25 vCPU garantizado
+              memory: "256Mi"  # 256 MiB garantizados
+            limits:
+              cpu: "500m"      # Máximo 0.5 vCPU
+              memory: "512Mi"  # Máximo 512 MiB
+          # Ajusta estos endpoints si no usas Spring Boot Actuator
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            failureThreshold: 30    # Hasta 30 * 5s = 150s para arrancar
+            periodSeconds: 5
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+      terminationGracePeriodSeconds: 30
