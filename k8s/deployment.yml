@@ -5,6 +5,12 @@ metadata:
   namespace: default
 spec:
   replicas: 1
+  progressDeadlineSeconds: 600
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   selector:
     matchLabels:
       app: ms-notification-service-v1
@@ -19,7 +25,6 @@ spec:
           ports:
             - containerPort: 8080
           env:
-            # Ajusta la JVM para respetar los límites del contenedor
             - name: JAVA_TOOL_OPTIONS
               value: >-
                 -XX:+UseContainerSupport
@@ -28,12 +33,11 @@ spec:
                 -XX:+ExitOnOutOfMemoryError
           resources:
             requests:
-              cpu: "250m"      # 0.25 vCPU garantizado
-              memory: "256Mi"  # 256 MiB garantizados
+              cpu: "250m"
+              memory: "256Mi"
             limits:
-              cpu: "500m"      # Máximo 0.5 vCPU
-              memory: "512Mi"  # Máximo 512 MiB
-          # Ajusta estos endpoints si no usas Spring Boot Actuator
+              cpu: "500m"
+              memory: "512Mi"
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
@@ -54,10 +58,10 @@ spec:
             httpGet:
               path: /actuator/health
               port: 8080
-            failureThreshold: 30    # Hasta 30 * 5s = 150s para arrancar
+            failureThreshold: 30
             periodSeconds: 5
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
-            runAsNonRoot: true
+            runAsNonRoot: true   # <-- deja esto solo si tu imagen ya corre como no-root
       terminationGracePeriodSeconds: 30

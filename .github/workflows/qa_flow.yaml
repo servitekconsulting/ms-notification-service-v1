@@ -47,17 +47,17 @@ jobs:
     needs: [build_deploy]
     with:
       environment: qa
-      owasp_target: 'http://135.237.235.57/'
+      owasp_target: 'http://172.193.77.232/'
     secrets: inherit
 
-  chatgpt-failure-advisor:
-    needs: [compile_and_test, build_deploy, owasp_scan]
-    if: failure()     # ← condición para que solo corra si falló algún job previo
-    uses: servitekconsulting/reusable-workflows/.github/workflows/chatgpt_failure.yaml@main
-    permissions:
-      contents: read
-      actions: read    # ← si tu script usa la API de Actions/logs
-    with:
-      python_version: '3.10'
-      environment: qa
-    secrets: inherit
+  #chatgpt-failure-advisor:
+  #  needs: [compile_and_test, build_deploy, owasp_scan]
+  #  if: failure()     # ← condición para que solo corra si falló algún job previo
+  #  uses: servitekconsulting/reusable-workflows/.github/workflows/chatgpt_failure.yaml@main
+  #  permissions:
+  #    contents: read
+  #    actions: read    # ← si tu script usa la API de Actions/logs
+  #  with:
+  #    python_version: '3.10'
+  #    environment: qa
+  #  secrets: inherit
