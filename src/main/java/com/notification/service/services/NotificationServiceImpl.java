@@ -24,6 +24,7 @@ public class NotificationServiceImpl {
   private String defaultFrom;
 
   public void execute(RequestDTO requestDTO){
+    log.error("Start execute serviceImpl");
     notificationDao.sendNotificationMessage(sendMessage(requestDTO));
   }
 
