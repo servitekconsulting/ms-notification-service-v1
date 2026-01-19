@@ -18,8 +18,8 @@ jobs:
 
       # --- SonarCloud ---
       sonar_enabled: true
-      sonar_project_key: "developer1-servitekconsulting_api-tesis-prueba"
-      sonar_organization: "developer1-servitekconsulting"
+      sonar_project_key: "servitekconsulting_ms-notification-service-v1"
+      sonar_organization: "servitekconsulting"
       sonar_host_url: "https://sonarcloud.io"
 
       # --- Snyk (SCA) ---
@@ -30,7 +30,7 @@ jobs:
 
       # --- OWASP ZAP (DAST) ---
       owasp_enabled: true
-      owasp_target: "http://4.152.197.247/"
+      owasp_target: "http://172.193.77.232/"
       owasp_cmd_options: "-a"
       owasp_environment: "qa"
 
