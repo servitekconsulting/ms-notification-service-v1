@@ -50,7 +50,10 @@ jobs:
 
   chatgpt_failure_advisor_stg:
     needs: [unit_test, build_deploy_stg]
-    if: failure()     # ← condición para que solo corra si falló algún job previo
+    #if: failure()     # ← condición para que solo corra si falló algún job previo
+    if: >
+      always() &&
+      (needs.unit_test.result == 'failure' || needs.build_deploy_stg.result == 'failure')
     uses: servitekconsulting/reusable-workflows/.github/workflows/chatgpt_failure.yaml@main
     permissions:
       contents: read
@@ -103,15 +106,16 @@ jobs:
       working-directory: .
       image-name: ms-notification-service-v1
       environment: prd
-      releaseCandidateVersion: ${{ needs.promote_to_prod.outputs.ga_version }}  # usa el 
-      #deployment_name: "myapp-java"       # <- nombre exacto del Deployment en k8s
-      #namespace: "default"
+      releaseCandidateVersion: ${{ needs.promote_to_prod.outputs.ga_version }}
     secrets: inherit
   
   
   rollback_if_failed:
     needs: [deploy_prod]
-    if: failure()
+    #if: failure()
+    if: >
+      always() &&
+      (needs.deploy_prod.result == 'failure')
     uses: servitekconsulting/reusable-workflows/.github/workflows/rollback.yaml@main
     with:
       rollback_mode: "revision"
@@ -123,7 +127,10 @@ jobs:
 
   chatgpt_failure_advisor_prod:
     needs: [deploy_prod, rollback_if_failed]
-    if: failure()     # ← condición para que solo corra si falló algún job previo
+    #if: failure()
+    if: >
+      always() &&
+      (needs.deploy_prod.result == 'failure' || needs.rollback_if_failed.result == 'failure')
     uses: servitekconsulting/reusable-workflows/.github/workflows/chatgpt_failure.yaml@main
     permissions:
       contents: read
