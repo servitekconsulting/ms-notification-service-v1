@@ -23,7 +23,7 @@ public class NotificationController {
 
   private final NotificationServiceImpl notificationService;
 
-  @PostMapping("/email")
+  @PostMapping("/emails")
   public ResponseEntity<ResponseDTO> notification(@RequestBody RequestDTO requestDTO) {
 
     notificationService.execute(requestDTO);

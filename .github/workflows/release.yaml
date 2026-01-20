@@ -50,7 +50,6 @@ jobs:
 
   chatgpt_failure_advisor_stg:
     needs: [unit_test, build_deploy_stg]
-    #if: failure()     # ← condición para que solo corra si falló algún job previo
     if: >
       always() &&
       (needs.unit_test.result == 'failure' || needs.build_deploy_stg.result == 'failure')
@@ -112,7 +111,6 @@ jobs:
   
   rollback_if_failed:
     needs: [deploy_prod]
-    #if: failure()
     if: >
       always() &&
       (needs.deploy_prod.result == 'failure')
@@ -127,7 +125,6 @@ jobs:
 
   chatgpt_failure_advisor_prod:
     needs: [deploy_prod, rollback_if_failed]
-    #if: failure()
     if: >
       always() &&
       (needs.deploy_prod.result == 'failure' || needs.rollback_if_failed.result == 'failure')
