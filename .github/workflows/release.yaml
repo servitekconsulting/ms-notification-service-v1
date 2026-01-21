@@ -63,7 +63,7 @@ jobs:
     secrets: inherit
 
   create_rc_release:
-    needs: [build_deploy_stg]   # por si quieres encadenarlo
+    needs: [build_deploy_calidad]   # por si quieres encadenarlo
     uses: servitekconsulting/reusable-workflows/.github/workflows/create_release.yaml@main
     with:
       version: ${{ github.event.inputs.releaseCandidateVersion }}
