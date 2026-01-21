@@ -33,7 +33,7 @@ jobs:
       coverage_path: "target/site/jacoco"
     secrets: inherit
 
-  build_deploy_stg:
+  build_deploy_calidad:
     permissions:
       contents: read
       packages: write
@@ -48,11 +48,11 @@ jobs:
       environment: stg
       releaseCandidateVersion: ${{ github.event.inputs.releaseCandidateVersion }}
 
-  chatgpt_failure_advisor_stg:
-    needs: [unit_test, build_deploy_stg]
+  chatgpt_failure_advisor_calidad:
+    needs: [unit_test, build_deploy_calidad]
     if: >
       always() &&
-      (needs.unit_test.result == 'failure' || needs.build_deploy_stg.result == 'failure')
+      (needs.unit_test.result == 'failure' || needs.build_deploy_calidad.result == 'failure')
     uses: servitekconsulting/reusable-workflows/.github/workflows/chatgpt_failure.yaml@main
     permissions:
       contents: read
