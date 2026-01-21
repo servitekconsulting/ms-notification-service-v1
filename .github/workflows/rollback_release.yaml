@@ -1,4 +1,4 @@
-name: CD Rollback Release
+name: Pipeline CD Rollback Release
 
 on:
   workflow_dispatch:

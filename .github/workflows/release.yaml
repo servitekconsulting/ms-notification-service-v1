@@ -1,4 +1,4 @@
-name: CD Calidad/Producción Flow
+name: Pipeline CD Calidad/Producción
 
 on:
   workflow_dispatch:

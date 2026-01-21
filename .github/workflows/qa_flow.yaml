@@ -1,4 +1,4 @@
-name: CD Desarrollo Flow
+name: Pipeline CD Desarrollo
 
 on:
   push:
