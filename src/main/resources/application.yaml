@@ -1,13 +1,13 @@
 
 spring:
   mail:
-    host: smtp2go.com
+    host: mail.smtp2go.com
     #host: smtp.mailersend.net
     port: 587
     #username: MS_ROESWe@test-eqvygm09vv5l0p7w.mlsender.net
     #password: mssp.gOGxn89.3z0vklokjdp47qrx.Soucdzs
-    username: async-notify-v1
-    password: o53VB[qPjFFAH+zFM/N.5Jarqx4UIBa9UrweG#?bgi?xy3uI+x
+    username: servitekconsulting.com
+    password: Hw9wPVCohMkiw548
     properties:
       mail:
         smtp:
@@ -18,4 +18,4 @@ spring:
 app:
   mail:
     #from: notificaciones@test-eqvygm09vv5l0p7w.mlsender.net
-    from: devops@streampayments.io
+    from: developer.abap1@servitekconsulting.com
