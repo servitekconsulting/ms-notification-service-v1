@@ -47,7 +47,7 @@ jobs:
     needs: [build_deploy]
     with:
       environment: qa
-      owasp_target: 'http://172.193.77.232/'
+      owasp_target: 'http://172.193.40.181/'
     secrets: inherit
 
   chatgpt-failure-advisor:
